@@ -1,13 +1,5 @@
 import React, { useState } from 'react'
-import {
-    Alert,
-    Button,
-    Div,
-    Panel,
-    PanelHeader,
-    Paragraph,
-    ScreenSpinner,
-} from '@vkontakte/vkui'
+import { Alert, Button, Div, Paragraph, ScreenSpinner } from '@vkontakte/vkui'
 import '@vkontakte/vkui/dist/vkui.css'
 import { Fact } from '../interfaces/Ifact'
 import { getFact } from '../api/getFact'
@@ -36,32 +28,27 @@ const CatFact: React.FC = () => {
     }
 
     return (
-        <div>
-            <Panel>
-                <PanelHeader>VK test assignment</PanelHeader>
-                <Div style={{ margin: '0 auto' , padding: "100px"}}>
-                    {isLoading ? (
-                        <ScreenSpinner state="loading" />
-                    ) : isError ? (
-                        <Alert onClose={() => {}}>{errorMessage}</Alert>
-                    ) : (
-                        <Div>
-                            <Paragraph style={{ marginRight: '20px' }}>
-                                {fact && fact.fact}
-                            </Paragraph>
-                            <Button
-                                appearance="accent"
-                                size="s"
-                                align="center"
-                                onClick={handleGetData}
-                            >
-                                Запросить факт
-                            </Button>
-                        </Div>
-                    )}
+        <Div style={{ margin: '0 auto', padding: '100px' }}>
+            {isLoading ? (
+                <ScreenSpinner state="loading" />
+            ) : isError ? (
+                <Alert onClose={() => {}}>{errorMessage}</Alert>
+            ) : (
+                <Div>
+                    <Paragraph style={{ marginRight: '20px' }}>
+                        {fact && fact.fact}
+                    </Paragraph>
+                    <Button
+                        appearance="accent"
+                        size="s"
+                        align="center"
+                        onClick={handleGetData}
+                    >
+                        Запросить факт
+                    </Button>
                 </Div>
-            </Panel>
-        </div>
+            )}
+        </Div>
     )
 }
 
