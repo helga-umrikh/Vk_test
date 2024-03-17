@@ -1,11 +1,12 @@
-import React from 'react';
-import './App.css';
+import React from 'react'
+import CatFact from './components/CatFact'
 
-function App() {
-  return (
-    <div className="App">
-    </div>
-  );
+const App: React.FC = () => {
+    return (
+        <div className="App">
+          <CatFact />
+        </div>
+    )
 }
 
-export default App;
+export default App
