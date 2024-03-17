@@ -1,17 +1,64 @@
-import React from 'react'
-import { Button, Div, Panel, PanelHeader, Paragraph } from '@vkontakte/vkui'
+import React, { useState } from 'react'
+import {
+    Alert,
+    Button,
+    Div,
+    Panel,
+    PanelHeader,
+    Paragraph,
+    ScreenSpinner,
+} from '@vkontakte/vkui'
 import '@vkontakte/vkui/dist/vkui.css'
+import { Fact } from '../interfaces/Ifact'
+import { getFact } from '../api/getFact'
 
-const CatFact = () => {
+const CatFact: React.FC = () => {
+    const [fact, setFact] = useState<Fact>()
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isError, setIsError] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<any>()
+
+    const getData = async () => {
+        try {
+            setIsLoading(true)
+            const data = await getFact()
+            setIsLoading(false)
+            setFact(data)
+        } catch (e) {
+            setIsLoading(false)
+            setIsError(true)
+            setErrorMessage('Произошла ошибка, перезагрузите страницу')
+        }
+    }
+
+    const handleGetData = () => {
+        getData()
+    }
+
     return (
         <div>
             <Panel>
                 <PanelHeader>VK test assignment</PanelHeader>
-                <Div style={{ margin: '0 auto' }}>
-                    <Paragraph style={{ marginRight: '20px' }}></Paragraph>
-                    <Button appearance="accent" size="s" align="center">
-                        Запросить факт
-                    </Button>
+                <Div style={{ margin: '0 auto' , padding: "100px"}}>
+                    {isLoading ? (
+                        <ScreenSpinner state="loading" />
+                    ) : isError ? (
+                        <Alert onClose={() => {}}>{errorMessage}</Alert>
+                    ) : (
+                        <Div>
+                            <Paragraph style={{ marginRight: '20px' }}>
+                                {fact && fact.fact}
+                            </Paragraph>
+                            <Button
+                                appearance="accent"
+                                size="s"
+                                align="center"
+                                onClick={handleGetData}
+                            >
+                                Запросить факт
+                            </Button>
+                        </Div>
+                    )}
                 </Div>
             </Panel>
         </div>
