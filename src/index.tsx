@@ -1,7 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { AdaptivityProvider, ConfigProvider } from '@vkontakte/vkui'
-import './index.css'
 import App from './App'
 
 const container = document.getElementById('root')
