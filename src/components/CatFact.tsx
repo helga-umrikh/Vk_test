@@ -1,58 +1,53 @@
-import React, { useState, useRef } from 'react'
-import {
-    Button,
-    Textarea,
-    FormLayoutGroup,
-    FormItem,
-} from '@vkontakte/vkui'
+import React, { useRef } from 'react'
+import { Button, Textarea, FormLayoutGroup, FormItem } from '@vkontakte/vkui'
 import '@vkontakte/vkui/dist/vkui.css'
 import { getFact } from '../api/getFact'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { debounce } from 'lodash'
 
 const CatFact: React.FC = () => {
-    const [fact, setFact] = useState<string>('')
     const inputRef = useRef<HTMLTextAreaElement>(null)
+    const queryClient = useQueryClient()
+    const queryKey = 'myData'
 
-    const getData = async () => {
-        try {
-            const { fact } = await getFact()
-            setFact(fact)
+    const { data, refetch } = useQuery(
+        { queryKey: [queryKey], queryFn: getFact, enabled: false },
+        queryClient
+    )
 
-            if (inputRef.current) {
-                const words = fact.split(' ')
-                const firstWordLength = words[0].length
-                inputRef.current.value = fact
+    const handleClick = async () => {
+        await queryClient.cancelQueries({ queryKey: [queryKey], exact: true })
+        await refetch()
+    }
 
-                inputRef.current.setSelectionRange(
-                    firstWordLength,
-                    firstWordLength
-                )
-                inputRef.current.focus()
-            }
-        } catch(e) {
-            if (e instanceof Error) {
-                throw new Error(e.message)
-            } else {
-                throw new Error('An unknown error occurred')
-            }
-        }
+    const debouncedHandleClick = debounce(handleClick, 1000)
+
+    if (inputRef.current && data?.fact) {
+        const { fact } = data
+        const words = fact.split(' ')
+        const firstWordLength = words[0].length
+        inputRef.current.value = fact
+
+        inputRef.current.setSelectionRange(firstWordLength, firstWordLength)
+        inputRef.current.focus()
     }
 
     return (
-            <FormLayoutGroup mode="horizontal">
-                <FormItem top="Cat Fact">
-                    <Textarea getRef={inputRef} value={fact} />
-                </FormItem>
-                <FormItem>
-                    <Button
-                        appearance="accent"
-                        size="l"
-                        align="center"
-                        onClick={getData}
-                    >
-                        Запросить факт
-                    </Button>
-                </FormItem>
-            </FormLayoutGroup>
+        <FormLayoutGroup mode="horizontal">
+            <FormItem top="Cat Fact">
+                <Textarea getRef={inputRef} value={data?.fact || ''} />
+            </FormItem>
+            <FormItem>
+                <Button
+                    appearance="accent"
+                    size="l"
+                    align="center"
+                    onClick={debouncedHandleClick}
+                >
+                    Запросить факт
+                </Button>
+            </FormItem>
+        </FormLayoutGroup>
     )
 }
 

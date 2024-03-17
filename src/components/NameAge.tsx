@@ -8,31 +8,21 @@ import {
 } from '@vkontakte/vkui'
 import '@vkontakte/vkui/dist/vkui.css'
 import { getAge } from '../api/getAge'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 
 const NameAge: React.FC = () => {
+    const queryClient = useQueryClient()
+    const queryKey = 'myData'
+
     const [name, setName] = useState('')
-    const [age, setAge] = useState<number | null>(null)
     const [validationState, setValidationState] = useState<
         'default' | 'error' | 'valid' | undefined
     >()
 
-    const getUserAgeFromName = async (name: string) => {
-        try {
-            const { age } = await getAge(name)
-            age && setAge(age)
-        } catch(e) {
-            if (e instanceof Error) {
-                throw new Error(e.message)
-            } else {
-                throw new Error('An unknown error occurred')
-            }
-        }
-    }
-
-    const debouncedGetUserAgeFromName = debounce(
-        (name) => getUserAgeFromName(name),
-        3000
+    const { data, refetch } = useQuery(
+        { queryKey: [queryKey], queryFn: () => getAge(name), enabled: false },
+        queryClient
     )
 
     const validate = (name: string) => {
@@ -46,16 +36,34 @@ const NameAge: React.FC = () => {
         setValidationState('default')
     }
 
+    const fetchData = async () => {
+        await queryClient.cancelQueries({ queryKey: [queryKey], exact: true })
+        await refetch()
+    }
+
+
+    const debouncedFetchData = debounce(fetchData, 3000);
+
     const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         validate(value)
         setName(value)
+
+        if(!name || validationState === 'error') {
+            debouncedFetchData();
+        }
     }
 
-    const handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault()
-        debouncedGetUserAgeFromName(name)
+
+        await queryClient.cancelQueries({ queryKey: [queryKey], exact: true })
+        await refetch()
     }
+
+    const debouncedHandleSubmit = debounce(handleSubmit,
+        1000
+    )
 
     return (
         <div>
@@ -77,21 +85,21 @@ const NameAge: React.FC = () => {
                         disabled={!name || validationState === 'error'}
                         size="l"
                         type="submit"
-                        onClick={handleSubmit}
+                        onClick={debouncedHandleSubmit}
                     >
                         Запросить возраст
                     </Button>
                 </FormItem>
             </FormLayoutGroup>{' '}
-            {age && (
+            {data?.age && (
                 <Paragraph
                     style={{
                         padding:
                             'var(--vkui--size_form_item_padding_vertical--regular) var(--vkui--size_base_padding_horizontal--regular)',
                     }}
                 >
-                    {age
-                        ? `Возраст пользователя: ${age}`
+                    {data.age
+                        ? `Возраст пользователя: ${data.age}`
                         : `Возраст пользователя ${name} не определен`}
                 </Paragraph>
             )}
