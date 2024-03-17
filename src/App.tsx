@@ -1,6 +1,7 @@
 import React from 'react'
 import CatFact from './components/CatFact'
 import { Panel, PanelHeader } from '@vkontakte/vkui'
+import NameAge from './components/NameAge'
 
 const App: React.FC = () => {
     return (
@@ -8,6 +9,7 @@ const App: React.FC = () => {
             <Panel>
                 <PanelHeader>VK test assignment</PanelHeader>
                 <CatFact />
+                <NameAge />
             </Panel>
         </div>
     )
